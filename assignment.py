@@ -28,8 +28,13 @@ def main():
     mainSurface = pygame.display.set_mode((surfaceSize, surfaceSize))
 
     # -----------------------------Program Variable Initialization----------------------------#
+    #  game state
+    gameState = "main game"
+
+    #  Card variables
     cardsBack = pygame.image.load("card_back.png")
-    cardsPos = [(20, 20)]
+    cardsPos = [(50, 20), (200, 20), (350, 20), (500, 20), (650, 20), (50, 220)]
+    numberOfCards = 6
 
     # -----------------------------Main Program Loop---------------------------------------------#
     while True:
@@ -38,16 +43,15 @@ def main():
         if ev.type == pygame.QUIT:  # Window close button clicked?
             break  # ... leave game loop
 
-        # -----------------------------Program Logic---------------------------------------------#
-        # Update your game objects and data structures here...
+        if gameState == "main game":
+            # -----------------------------Program Logic---------------------------------------------#
 
-        # -----------------------------Drawing Everything-------------------------------------#
-        # We draw everything from scratch on each frame.
-        # So first fill everything with the background color
-        mainSurface.fill((0, 200, 255))
+            # -----------------------------Drawing Everything-------------------------------------#
+            mainSurface.fill((0, 200, 255))
 
-        #  Drawing cards
-        mainSurface.blit(cardsBack, cardsPos)
+            #  Drawing cards
+            for i in range(numberOfCards):
+                mainSurface.blit(cardsBack, cardsPos[i])
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
