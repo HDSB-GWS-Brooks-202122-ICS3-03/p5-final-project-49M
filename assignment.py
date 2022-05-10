@@ -14,11 +14,6 @@
 #   ...
 # -----------------------------------------------------------------------------
 import pygame
-import time
-
-
-def timeNow():
-    return int(time.time())
 
 
 def main():
@@ -47,8 +42,10 @@ def main():
                 (650, 300), (50, 500), (200, 500), (350, 500), (500, 500), (650, 500), (50, 700), (200, 700),
                 (350, 700), (500, 700), (650, 700)]
     cardFrontPos = [(-200, 0), (-200, 0)]
+    selectedCard = -1
     numberOfCards = 20
     oneCardUp = False
+    upTime = 0
 
     # -----------------------------Main Program Loop---------------------------------------------#
     while True:
@@ -60,19 +57,29 @@ def main():
 
         #  Makes the mouse click faster and run smoother because it doesn't consider the mouses motion or when there is
         #  no event
-        if ev.type == pygame.MOUSEMOTION or ev.type == pygame.NOEVENT:
+        if ev.type == pygame.MOUSEMOTION:
             continue
 
         if gameState == "main game":
+
             #  Event Handling
             #  Mouse position and click recognition
             if oneCardUp:
                 if ev.type == pygame.MOUSEBUTTONDOWN:
                     mouseX, mouseY = ev.pos
                     for i in range(numberOfCards):
-                        if cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
+                        if i != selectedCard and cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
                                 cardsPos[i][1] <= mouseY <= cardsPos[i][1] + 180:
                             cardFrontPos[1] = cardsPos[i]
+                            upTime = pygame.time.get_ticks()
+                            break
+
+                currentTime = pygame.time.get_ticks()
+                if upTime > 0 and currentTime - upTime > 1000:
+                    cardFrontPos[0] = (-200, 0)
+                    cardFrontPos[1] = (-200, 0)
+                    oneCardUp = False
+                    upTime = 0
 
             if not oneCardUp:
                 if ev.type == pygame.MOUSEBUTTONDOWN:
@@ -83,9 +90,10 @@ def main():
                             print("card clicked")
                             cardFrontPos[0] = cardsPos[i]
                             oneCardUp = True
+                            selectedCard = i
+                            break
 
             # -----------------------------Program Logic---------------------------------------------#
-
             # -----------------------------Drawing Everything-------------------------------------#
             mainSurface.blit(cardsBackground, (0, 0))
 
