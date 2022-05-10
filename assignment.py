@@ -46,6 +46,7 @@ def main():
     numberOfCards = 20
     oneCardUp = False
     upTime = 0
+    secondCardUp = False
 
     # -----------------------------Main Program Loop---------------------------------------------#
     while True:
@@ -65,13 +66,14 @@ def main():
             #  Event Handling
             #  Mouse position and click recognition
             if oneCardUp:
-                if ev.type == pygame.MOUSEBUTTONDOWN:
+                if ev.type == pygame.MOUSEBUTTONDOWN and not secondCardUp:
                     mouseX, mouseY = ev.pos
                     for i in range(numberOfCards):
                         if i != selectedCard and cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
                                 cardsPos[i][1] <= mouseY <= cardsPos[i][1] + 180:
                             cardFrontPos[1] = cardsPos[i]
                             upTime = pygame.time.get_ticks()
+                            secondCardUp = True
                             break
 
                 currentTime = pygame.time.get_ticks()
@@ -80,6 +82,7 @@ def main():
                     cardFrontPos[1] = (-200, 0)
                     oneCardUp = False
                     upTime = 0
+                    secondCardUp = False
 
             if not oneCardUp:
                 if ev.type == pygame.MOUSEBUTTONDOWN:
