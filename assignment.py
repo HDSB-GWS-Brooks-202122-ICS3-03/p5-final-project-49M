@@ -41,12 +41,39 @@ def main():
                 (500, 300),
                 (650, 300), (50, 500), (200, 500), (350, 500), (500, 500), (650, 500), (50, 700), (200, 700),
                 (350, 700), (500, 700), (650, 700)]
-    cardFrontPos = [(-200, 0), (-200, 0)]
-    selectedCard = -1
+
     numberOfCards = 20
+    #  Makes all the cards back visible and all card fronts invisible
+    visible = [True for _ in range(numberOfCards)]
+    sideUp = [False for _ in range(numberOfCards)]
+
+    selectedCard2 = -1
+    selectedCard = -1
+
     oneCardUp = False
     upTime = 0
     secondCardUp = False
+    #  Sprites
+    demon = pygame.image.load('big_demon_idle_anim_f0.png')
+    doubledDemon = pygame.transform.scale2x(demon)
+    zombie = pygame.image.load('big_zombie_idle_anim_f0.png')
+    doubledZombie = pygame.transform.scale2x(zombie)
+    elf = pygame.image.load('elf_m_hit_anim_f0.png')
+    doubleElf = pygame.transform.scale2x(elf)
+    flask = pygame.image.load('flask_big_blue.png')
+    doubleFlask = pygame.transform.scale2x(flask)
+    goblin = pygame.image.load('goblin_idle_anim_f0.png')
+    doubledGoblin = pygame.transform.scale2x(goblin)
+    iceZombie = pygame.image.load('ice_zombie_run_anim_f0.png')
+    doubleIceZombie = pygame.transform.scale2x(iceZombie)
+    knight = pygame.image.load('knight_f_hit_anim_f0.png')
+    doubledKnight = pygame.transform.scale2x(knight)
+    lizard = pygame.image.load('lizard_m_idle_anim_f1.png')
+    doubleLizard = pygame.transform.scale2x(lizard)
+    swampy = pygame.image.load('swampy_idle_anim_f1.png')
+    doubledSwampy = pygame.transform.scale2x(swampy)
+    wizzard = pygame.image.load('wizzard_m_idle_anim_f1.png')
+    doubledWizzard = pygame.transform.scale2x(wizzard)
 
     # -----------------------------Main Program Loop---------------------------------------------#
     while True:
@@ -71,42 +98,47 @@ def main():
                     for i in range(numberOfCards):
                         if i != selectedCard and cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
                                 cardsPos[i][1] <= mouseY <= cardsPos[i][1] + 180:
-                            cardFrontPos[1] = cardsPos[i]
+                            selectedCard2 = i
                             upTime = pygame.time.get_ticks()
                             secondCardUp = True
+                            sideUp[i] = True
                             break
 
                 currentTime = pygame.time.get_ticks()
                 if upTime > 0 and currentTime - upTime > 1000:
-                    cardFrontPos[0] = (-200, 0)
-                    cardFrontPos[1] = (-200, 0)
+                    sideUp[selectedCard] = False
+                    sideUp[selectedCard2] = False
+                    selectedCard2 = False
                     oneCardUp = False
                     upTime = 0
                     secondCardUp = False
 
-            if not oneCardUp:
+            elif not oneCardUp:
                 if ev.type == pygame.MOUSEBUTTONDOWN:
                     mouseX, mouseY = ev.pos
                     for i in range(numberOfCards):
                         if cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
                                 cardsPos[i][1] <= mouseY <= cardsPos[i][1] + 180:
                             print("card clicked")
-                            cardFrontPos[0] = cardsPos[i]
                             oneCardUp = True
                             selectedCard = i
+                            sideUp[i] = True
                             break
 
             # -----------------------------Program Logic---------------------------------------------#
+
             # -----------------------------Drawing Everything-------------------------------------#
             mainSurface.blit(cardsBackground, (0, 0))
 
             #  Drawing cards
             #  Back of card
             for i in range(numberOfCards):
-                mainSurface.blit(cardsBack, cardsPos[i])
-            #  Front of card
-            mainSurface.blit(cardsFront, cardFrontPos[0])
-            mainSurface.blit(cardsFront, cardFrontPos[1])
+                if visible[i]:
+                    cardImage = cardsBack
+                    if sideUp[i]:  # Front of card
+                        cardImage = cardsFront
+                    mainSurface.blit(cardImage, cardsPos[i])
+
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
 
