@@ -117,17 +117,6 @@ def main():
                             print(card2)
                             break
 
-                currentTime = pygame.time.get_ticks()
-                if upTime > 0 and currentTime - upTime > 1000:
-                    sideUp[selectedCard] = False
-                    sideUp[selectedCard2] = False
-                    selectedCard2 = False
-                    oneCardUp = False
-                    upTime = 0
-                    secondCardUp = False
-                    card1 = -1
-                    card2 = -2
-
             elif not oneCardUp:
                 if ev.type == pygame.MOUSEBUTTONDOWN:
                     mouseX, mouseY = ev.pos
@@ -145,6 +134,21 @@ def main():
             # -----------------------------Program Logic---------------------------------------------#
             if card1 == card2:
                 print("match")
+                visible[selectedCard] = False
+                visible[selectedCard2] = False
+                sideUp[selectedCard] = False
+                sideUp[selectedCard2] = False
+
+            currentTime = pygame.time.get_ticks()
+            if upTime > 0 and currentTime - upTime > 1000:
+                sideUp[selectedCard] = False
+                sideUp[selectedCard2] = False
+                selectedCard2 = False
+                oneCardUp = False
+                upTime = 0
+                secondCardUp = False
+                card1 = -1
+                card2 = -2
 
             # -----------------------------Drawing Everything-------------------------------------#
             mainSurface.blit(cardsBackground, (0, 0))
