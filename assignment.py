@@ -14,6 +14,7 @@
 #   ...
 # -----------------------------------------------------------------------------
 import pygame
+import random
 
 
 def main():
@@ -59,21 +60,31 @@ def main():
     zombie = pygame.image.load('big_zombie_idle_anim_f0.png')
     doubledZombie = pygame.transform.scale2x(zombie)
     elf = pygame.image.load('elf_m_hit_anim_f0.png')
-    doubleElf = pygame.transform.scale2x(elf)
+    doubledElf = pygame.transform.scale2x(elf)
     flask = pygame.image.load('flask_big_blue.png')
-    doubleFlask = pygame.transform.scale2x(flask)
+    doubledFlask = pygame.transform.scale2x(flask)
     goblin = pygame.image.load('goblin_idle_anim_f0.png')
     doubledGoblin = pygame.transform.scale2x(goblin)
     iceZombie = pygame.image.load('ice_zombie_run_anim_f0.png')
-    doubleIceZombie = pygame.transform.scale2x(iceZombie)
+    doubledIceZombie = pygame.transform.scale2x(iceZombie)
     knight = pygame.image.load('knight_f_hit_anim_f0.png')
     doubledKnight = pygame.transform.scale2x(knight)
     lizard = pygame.image.load('lizard_m_idle_anim_f1.png')
-    doubleLizard = pygame.transform.scale2x(lizard)
+    doubledLizard = pygame.transform.scale2x(lizard)
     swampy = pygame.image.load('swampy_idle_anim_f1.png')
     doubledSwampy = pygame.transform.scale2x(swampy)
     wizzard = pygame.image.load('wizzard_m_idle_anim_f1.png')
     doubledWizzard = pygame.transform.scale2x(wizzard)
+
+    #  Random sprite card order
+    sprites = [(doubledDemon, 1), (doubledDemon, 1), (doubledZombie, 2), (doubledZombie, 2), (doubledElf, 3),
+               (doubledElf, 3), (doubledFlask, 4), (doubledFlask, 4), (doubledGoblin, 5), (doubledGoblin, 5),
+               (doubledIceZombie, 6), (doubledIceZombie, 6), (doubledKnight, 7), (doubledKnight, 7), (doubledLizard, 8),
+               (doubledLizard, 8), (doubledSwampy, 9), (doubledSwampy, 9), (doubledWizzard, 10), (doubledWizzard, 10)]
+    random.shuffle(sprites)  # shuffles the order when the game is run
+
+    card1 = -1
+    card2 = -2
 
     # -----------------------------Main Program Loop---------------------------------------------#
     while True:
@@ -102,6 +113,8 @@ def main():
                             upTime = pygame.time.get_ticks()
                             secondCardUp = True
                             sideUp[i] = True
+                            card2 = sprites[i][1]
+                            print(card2)
                             break
 
                 currentTime = pygame.time.get_ticks()
@@ -112,6 +125,8 @@ def main():
                     oneCardUp = False
                     upTime = 0
                     secondCardUp = False
+                    card1 = -1
+                    card2 = -2
 
             elif not oneCardUp:
                 if ev.type == pygame.MOUSEBUTTONDOWN:
@@ -123,9 +138,13 @@ def main():
                             oneCardUp = True
                             selectedCard = i
                             sideUp[i] = True
+                            card1 = sprites[i][1]
+                            print(card1)
                             break
 
             # -----------------------------Program Logic---------------------------------------------#
+            if card1 == card2:
+                print("match")
 
             # -----------------------------Drawing Everything-------------------------------------#
             mainSurface.blit(cardsBackground, (0, 0))
@@ -135,9 +154,11 @@ def main():
             for i in range(numberOfCards):
                 if visible[i]:
                     cardImage = cardsBack
+                    mainSurface.blit(cardImage, cardsPos[i])
                     if sideUp[i]:  # Front of card
                         cardImage = cardsFront
-                    mainSurface.blit(cardImage, cardsPos[i])
+                        mainSurface.blit(cardImage, cardsPos[i])
+                        mainSurface.blit(sprites[i][0], (cardsPos[i][0]+20, cardsPos[i][1]+30))
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
