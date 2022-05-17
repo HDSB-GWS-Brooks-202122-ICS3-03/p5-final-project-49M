@@ -132,14 +132,16 @@ def main():
                             break
 
             # -----------------------------Program Logic---------------------------------------------#
-            if card1 == card2:
-                print("match")
-                visible[selectedCard] = False
-                visible[selectedCard2] = False
-                sideUp[selectedCard] = False
-                sideUp[selectedCard2] = False
-
             currentTime = pygame.time.get_ticks()
+
+            if card1 == card2:
+                if upTime > 0 and currentTime - upTime > 1000:
+                    print("match")
+                    visible[selectedCard] = False
+                    visible[selectedCard2] = False
+                    sideUp[selectedCard] = False
+                    sideUp[selectedCard2] = False
+
             if upTime > 0 and currentTime - upTime > 1000:
                 sideUp[selectedCard] = False
                 sideUp[selectedCard2] = False
