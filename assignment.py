@@ -30,9 +30,10 @@ def main():
 
     # -----------------------------Program Variable Initialization----------------------------#
     #  game state
-    gameState = "main game"
+    gameState = "game over"
 
     #  main game state variables
+
     cardsBackground = pygame.image.load('cardGameBg.jpg')
     cardsBackground = pygame.transform.scale(cardsBackground, (surfaceSize, surfaceSize))
     #  Card variables
@@ -87,9 +88,17 @@ def main():
     card1 = -1
     card2 = -2
 
+    #  Game Over State variables
+
+    gameOverBG = pygame.image.load('gameOverBG.jpg')
+    gameOverBG = pygame.transform.scale(gameOverBG, (surfaceSize + 200, surfaceSize))
+
     #  counter of amount of clicks
     counter = pygame.font.SysFont('impact', 45)
     clickCount = 0
+
+    #  The number of pairs that have been found and have disappeared
+    noPair = 0
 
     # -----------------------------Main Program Loop---------------------------------------------#
     while True:
@@ -143,10 +152,12 @@ def main():
             if card1 == card2:
                 if upTime > 0 and currentTime - upTime > 1000:
                     print("match")
+                    #  Makes the cards disappear
                     visible[selectedCard] = False
                     visible[selectedCard2] = False
                     sideUp[selectedCard] = False
                     sideUp[selectedCard2] = False
+                    noPair += 1  # Increases by one every time a pair disappears
 
             #  When both cards are flipped up, this makes sure that they go back down automatically after one second
             if upTime > 0 and currentTime - upTime > 1000:
@@ -158,6 +169,10 @@ def main():
                 secondCardUp = False
                 card1 = -1
                 card2 = -2
+
+                #  Checks if all card matches are gone and if so changes to game over state
+                if noPair >= 10:
+                    gameState = "game over"
 
             # -----------------------------Drawing Everything-------------------------------------#
             mainSurface.blit(cardsBackground, (0, 0))
@@ -176,6 +191,9 @@ def main():
             #  Click counter
             clickText = counter.render(f"Clicks: {clickCount}", False, (255, 255, 255))
             mainSurface.blit(clickText, (10, 10))
+
+        elif gameState == "game over":
+            mainSurface.blit(gameOverBG, (0, 0))
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
