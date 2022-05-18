@@ -51,9 +51,9 @@ def main():
     selectedCard2 = -1
     selectedCard = -1
 
-    oneCardUp = False
-    upTime = 0
-    secondCardUp = False
+    oneCardUp = False  # When no cards are flipped up this is false
+    upTime = 0  # Time that both cards are flipped up, starting at 0
+    secondCardUp = False  # Second card flip recognition (False when no second card flipped, True when two cards up)
     #  Sprites
     demon = pygame.image.load('big_demon_idle_anim_f0.png')
     doubledDemon = pygame.transform.scale2x(demon)
@@ -83,8 +83,13 @@ def main():
                (doubledLizard, 8), (doubledSwampy, 9), (doubledSwampy, 9), (doubledWizzard, 10), (doubledWizzard, 10)]
     random.shuffle(sprites)  # shuffles the order when the game is run
 
+    #  cards selected, if both are the same Sprite then it is a match
     card1 = -1
     card2 = -2
+
+    #  counter of amount of clicks
+    counter = pygame.font.SysFont('impact', 45)
+    clickCount = 0
 
     # -----------------------------Main Program Loop---------------------------------------------#
     while True:
@@ -103,7 +108,7 @@ def main():
 
             #  Event Handling
             #  Mouse position and click recognition
-            if oneCardUp:
+            if oneCardUp:  # Allows second card to be flipped
                 if ev.type == pygame.MOUSEBUTTONDOWN and not secondCardUp:
                     mouseX, mouseY = ev.pos
                     for i in range(numberOfCards):
@@ -114,26 +119,27 @@ def main():
                             secondCardUp = True
                             sideUp[i] = True
                             card2 = sprites[i][1]
-                            print(card2)
+                            clickCount += 1
                             break
 
-            elif not oneCardUp:
+            elif not oneCardUp:  # When no card is face up this is possible
                 if ev.type == pygame.MOUSEBUTTONDOWN:
                     mouseX, mouseY = ev.pos
                     for i in range(numberOfCards):
                         if cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
                                 cardsPos[i][1] <= mouseY <= cardsPos[i][1] + 180:
-                            print("card clicked")
                             oneCardUp = True
                             selectedCard = i
                             sideUp[i] = True
                             card1 = sprites[i][1]
-                            print(card1)
+                            clickCount += 1
                             break
 
             # -----------------------------Program Logic---------------------------------------------#
+            #  Gets the current time of the program run time
             currentTime = pygame.time.get_ticks()
 
+            #  Checks if the card sprites that are flipped up are a match
             if card1 == card2:
                 if upTime > 0 and currentTime - upTime > 1000:
                     print("match")
@@ -142,6 +148,7 @@ def main():
                     sideUp[selectedCard] = False
                     sideUp[selectedCard2] = False
 
+            #  When both cards are flipped up, this makes sure that they go back down automatically after one second
             if upTime > 0 and currentTime - upTime > 1000:
                 sideUp[selectedCard] = False
                 sideUp[selectedCard2] = False
@@ -165,6 +172,10 @@ def main():
                         cardImage = cardsFront
                         mainSurface.blit(cardImage, cardsPos[i])
                         mainSurface.blit(sprites[i][0], (cardsPos[i][0]+20, cardsPos[i][1]+30))
+
+            #  Click counter
+            clickText = counter.render(f"Clicks: {clickCount}", False, (255, 255, 255))
+            mainSurface.blit(clickText, (10, 10))
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
