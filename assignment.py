@@ -88,14 +88,16 @@ def main():
     card1 = -1
     card2 = -2
 
+    #  Click counter font
+    counter = pygame.font.SysFont('impact', 45)
+    clickCount = 0  # amount of card clicks counter set to 0
+
     #  Game Over State variables
 
-    gameOverBG = pygame.image.load('gameOverBG.jpg')
+    gameOverBG = pygame.image.load('endScreenBG.jpg')
     gameOverBG = pygame.transform.scale(gameOverBG, (surfaceSize + 200, surfaceSize))
 
-    #  counter of amount of clicks
-    counter = pygame.font.SysFont('impact', 45)
-    clickCount = 0
+    headline = pygame.font.SysFont('impact', 120)
 
     #  The number of pairs that have been found and have disappeared
     noPair = 0
@@ -189,11 +191,15 @@ def main():
                         mainSurface.blit(sprites[i][0], (cardsPos[i][0]+20, cardsPos[i][1]+30))
 
             #  Click counter
-            clickText = counter.render(f"Clicks: {clickCount}", False, (255, 255, 255))
-            mainSurface.blit(clickText, (10, 10))
+            clickCounter = counter.render(f"Clicks: {clickCount}", False, (255, 255, 255))
+            mainSurface.blit(clickCounter, (10, 10))
 
         elif gameState == "game over":
             mainSurface.blit(gameOverBG, (0, 0))
+
+            #  End game text
+            endGame = headline.render("Game Over", False, (255, 255, 255))
+            mainSurface.blit(endGame, (180, 150))
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
