@@ -30,7 +30,7 @@ def main():
 
     # -----------------------------Program Variable Initialization----------------------------#
     #  game state
-    gameState = "game over"
+    gameState = "main game"
 
     #  main game state variables
 
@@ -97,10 +97,15 @@ def main():
     gameOverBG = pygame.image.load('endScreenBG.jpg')
     gameOverBG = pygame.transform.scale(gameOverBG, (surfaceSize + 200, surfaceSize))
 
+    #  Game over font
     headline = pygame.font.SysFont('impact', 120)
 
     #  The number of pairs that have been found and have disappeared
     noPair = 0
+
+    #  Play again button
+    replayButPos = [250, 500, 300, 100]
+    playAgain = pygame.font.SysFont('lucidaconsole', 40)
 
     # -----------------------------Main Program Loop---------------------------------------------#
     while True:
@@ -147,6 +152,7 @@ def main():
                             break
 
             # -----------------------------Program Logic---------------------------------------------#
+
             #  Gets the current time of the program run time
             currentTime = pygame.time.get_ticks()
 
@@ -188,18 +194,41 @@ def main():
                     if sideUp[i]:  # Front of card
                         cardImage = cardsFront
                         mainSurface.blit(cardImage, cardsPos[i])
-                        mainSurface.blit(sprites[i][0], (cardsPos[i][0]+20, cardsPos[i][1]+30))
+                        mainSurface.blit(sprites[i][0], (cardsPos[i][0] + 20, cardsPos[i][1] + 30))
 
             #  Click counter
             clickCounter = counter.render(f"Clicks: {clickCount}", False, (255, 255, 255))
             mainSurface.blit(clickCounter, (10, 10))
 
         elif gameState == "game over":
+            mousePos = pygame.mouse.get_pos()
+            #  Event handling --------------------------------------------------------------
+            if ev.type == pygame.MOUSEBUTTONUP:
+                if replayButPos[0] <= mousePos[0] <= replayButPos[0] + 300 and \
+                        replayButPos[1] <= mousePos[1] <= replayButPos[1] + 100:
+                    gameState = "main game"
+                    visible = [True for _ in range(numberOfCards)]
+                    sideUp = [False for _ in range(numberOfCards)]
+                    noPair = 0
+                    clickCount = 0
+                    random.shuffle(sprites)
+
+            #  Program Logic ----------------------------------------------------------------
+            #  Drawing everything -----------------------------------------------------------
             mainSurface.blit(gameOverBG, (0, 0))
 
             #  End game text
             endGame = headline.render("Game Over", False, (255, 255, 255))
-            mainSurface.blit(endGame, (180, 150))
+            mainSurface.blit(endGame, (175, 150))
+
+            #  Final click count
+            score = counter.render(f"Total Clicks: {clickCount}", False, (255, 255, 255))
+            mainSurface.blit(score, (300, 260))
+
+            #  play again button
+            pygame.draw.rect(mainSurface, (255, 255, 255), replayButPos, 5)
+            replayText = playAgain.render('Play Again', False, (0, 255, 0))
+            mainSurface.blit(replayText, (replayButPos[0] + 30, replayButPos[1] + 30))
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
