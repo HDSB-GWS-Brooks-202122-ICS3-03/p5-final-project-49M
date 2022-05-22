@@ -30,9 +30,24 @@ def main():
 
     # -----------------------------Program Variable Initialization----------------------------#
     #  game state
-    gameState = "main game"
+    gameState = "menu"
 
-    #  main game state variables
+    #  Menu screen game state variables -----------------------------------------------------
+
+    # Background
+    lobbyBackground = pygame.image.load('menuScreenBG.jpg')
+    lobbyBackground = pygame.transform.smoothscale(lobbyBackground, (surfaceSize - 100, surfaceSize))
+
+    #  Title font
+    gameName = pygame.font.SysFont('impact', 85)
+
+    #  Play button pos
+    playButPos = (275, 400, 250, 100)
+
+    #  play text
+    playTxt = pygame.font.SysFont('lucidaconsole', 70)
+
+    #  main game state variables ------------------------------------------------------------
 
     cardsBackground = pygame.image.load('cardGameBg.jpg')
     cardsBackground = pygame.transform.scale(cardsBackground, (surfaceSize, surfaceSize))
@@ -92,7 +107,7 @@ def main():
     counter = pygame.font.SysFont('impact', 45)
     clickCount = 0  # amount of card clicks counter set to 0
 
-    #  Game Over State variables
+    #  Game Over State variables --------------------------------------------------------------
 
     gameOverBG = pygame.image.load('endScreenBG.jpg')
     gameOverBG = pygame.transform.scale(gameOverBG, (surfaceSize + 200, surfaceSize))
@@ -115,14 +130,38 @@ def main():
         if ev.type == pygame.QUIT:  # Window close button clicked?
             break  # ... leave game loop
 
-        #  Makes the mouse click faster and run smoother because it doesn't consider the mouses motion or when there is
-        #  no event
-        if ev.type == pygame.MOUSEMOTION:
-            continue
+        if gameState == "menu":
+            #  Event Handling ------------------------------------------------------------------
+            mousePos = pygame.mouse.get_pos()
+            if ev.type == pygame.MOUSEBUTTONUP:
+                if playButPos[0] <= mousePos[0] <= playButPos[0] + 250 and \
+                        playButPos[1] <= mousePos[1] <= playButPos[1] + 100:
+                    gameState = "main game"
+            #  Game logic ---------------------------------------------------------------------
 
-        if gameState == "main game":
+            #  Drawing Everything --------------------------------------------------------------
 
-            #  Event Handling
+            #  Background image
+            mainSurface.blit(lobbyBackground, (0, 0))
+
+            #  Title
+            gameTitle = gameName.render("Match & Snatch", False, (255, 255, 255))
+            mainSurface.blit(gameTitle, (185, 150))
+
+            #  Play button
+            pygame.draw.rect(mainSurface, (242, 200, 75), playButPos, 5)
+            #  Play text
+            playGame = playTxt.render("PLAY", False, (255, 255, 255))
+            mainSurface.blit(playGame, (315, 415))
+
+        elif gameState == "main game":
+
+            #  Event Handling -------------------------------------------------------------------
+
+            #  Makes the mouse click faster and run smoother because it doesn't consider the mouses motion or when
+            #  there is no event
+            if ev.type == pygame.MOUSEMOTION:
+                continue
             #  Mouse position and click recognition
             if oneCardUp:  # Allows second card to be flipped
                 if ev.type == pygame.MOUSEBUTTONDOWN and not secondCardUp:
