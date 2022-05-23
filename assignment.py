@@ -16,18 +16,35 @@
 import pygame
 import random
 
+# -----------------------------Setup------------------------------------------------------#
+pygame.init()  # Prepare the pygame module for use
+surfaceSize = 900  # Desired physical surface size, in pixels.
+
+clock = pygame.time.Clock()  # Force frame rate to be slower
+
+# Create surface of (width, height), and its window.
+mainSurface = pygame.display.set_mode((surfaceSize - 100, surfaceSize))
+
+
+#  Function found on https://stackoverflow.com/questions/42014195/rendering-text-with-multiple-lines-in-pygame
+def blit_text(surface, text, pos, font, color=pygame.Color('white')):
+    sentences = [word.split(' ') for word in text.splitlines()]  # 2D array where each row is a list of words.
+    space = font.size(' ')[0]  # The width of a space is the width of one letter.
+    maxWidth = surfaceSize - 100
+    x, y = pos
+    for line in sentences:
+        for word in line:
+            wordSurface = font.render(word, 0, color)
+            wordWidth, wordHeight = wordSurface.get_size()
+            if x + wordWidth >= maxWidth:
+                x = pos[0]  # Reset the x.
+                y += wordHeight  # Start on new row.
+            surface.blit(wordSurface, (x, y))
+            x += wordWidth + space
+        x = pos[0]  # Reset the x.
+
 
 def main():
-    # -----------------------------Setup------------------------------------------------------#
-    """ Set up the game and run the main game loop """
-    pygame.init()  # Prepare the pygame module for use
-    surfaceSize = 900  # Desired physical surface size, in pixels.
-
-    clock = pygame.time.Clock()  # Force frame rate to be slower
-
-    # Create surface of (width, height), and its window.
-    mainSurface = pygame.display.set_mode((surfaceSize - 100, surfaceSize))
-
     # -----------------------------Program Variable Initialization----------------------------#
     #  game state
     gameState = "menu"
@@ -41,15 +58,33 @@ def main():
     #  Title font
     gameName = pygame.font.SysFont('impact', 85)
 
-    #  Play button pos
+    #  Play button position
     playButPos = (275, 400, 250, 100)
-
     #  play text
     playTxt = pygame.font.SysFont('lucidaconsole', 70)
 
+    #  How to play button position
+    howToButPos = (275, 530, 250, 50)
+    #  How to play text
+    howToPlayTxt = pygame.font.SysFont('lucidaconsole', 35)
+
+    #  How to play screen variables --------------------------------------------------------
+    #  Background
+    htpBackground = pygame.image.load('htpScreenBG.jpg')
+    htpBackground = pygame.transform.smoothscale(htpBackground, (surfaceSize + 100, surfaceSize + 60))
+    #  instructions text
+    rules = "Ready to put your memory to the test and have a great time? Well then your in the right place! " \
+            "To play match and snatch, simply click on two cards to reveal and see if theres a match. " \
+            "If playing solo, try to get all the matches with the least amount of card clicks. " \
+            "If playing head to head, try to collect the most pairs"
+    instructionFont = pygame.font.SysFont('arial', 30)
+    #  return button pos
+    returnPos = (325, 550, 150, 50)
+    returnFont = pygame.font.SysFont('impact', 40)
+
     #  main game state variables ------------------------------------------------------------
 
-    cardsBackground = pygame.image.load('cardGameBg.jpg')
+    cardsBackground = pygame.image.load('cardGameBg.jpg')  # game background
     cardsBackground = pygame.transform.scale(cardsBackground, (surfaceSize, surfaceSize))
     #  Card variables
     cardsBack = pygame.image.load("card_back.png")
@@ -130,15 +165,21 @@ def main():
         if ev.type == pygame.QUIT:  # Window close button clicked?
             break  # ... leave game loop
 
+        #  Starting screen
         if gameState == "menu":
             #  Event Handling ------------------------------------------------------------------
+            #  play button click detection
             mousePos = pygame.mouse.get_pos()
-            if ev.type == pygame.MOUSEBUTTONUP:
+            if ev.type == pygame.MOUSEBUTTONDOWN:
                 if playButPos[0] <= mousePos[0] <= playButPos[0] + 250 and \
                         playButPos[1] <= mousePos[1] <= playButPos[1] + 100:
                     gameState = "main game"
-            #  Game logic ---------------------------------------------------------------------
-
+                    #  Make sure to make a function that resets variables incase they go from end screen to menu
+                #  how to play button click recognition
+                elif howToButPos[0] <= mousePos[0] <= howToButPos[0] + 250 and \
+                        howToButPos[1] <= mousePos[1] <= howToButPos[1] + 50:
+                    gameState = "how to play"
+            #  logic ---------------------------------------------------------------------
             #  Drawing Everything --------------------------------------------------------------
 
             #  Background image
@@ -152,8 +193,35 @@ def main():
             pygame.draw.rect(mainSurface, (242, 200, 75), playButPos, 5)
             #  Play text
             playGame = playTxt.render("PLAY", False, (255, 255, 255))
-            mainSurface.blit(playGame, (315, 415))
+            mainSurface.blit(playGame, (playButPos[0] + 40, playButPos[1] + 15))
 
+            #  How to play button
+            pygame.draw.rect(mainSurface, (255, 255, 255), howToButPos, 3)
+            helpTxt = howToPlayTxt.render("How to Play", False, (242, 200, 75))
+            mainSurface.blit(helpTxt, (howToButPos[0] + 10, howToButPos[1] + 5))
+
+        #  How to play game state
+        elif gameState == "how to play":
+            #  Events -------------------------------------------------------
+            mousePos = pygame.mouse.get_pos()
+            if ev.type == pygame.MOUSEBUTTONDOWN:
+                if returnPos[0] <= mousePos[0] <= returnPos[0] + 150 and \
+                        returnPos[1] <= mousePos[1] <= returnPos[1] + 50:
+                    gameState = "menu"
+
+            #  Drawing everything --------------------------------------------
+            mainSurface.blit(htpBackground, (-100, 0))  # Background
+            #  Title
+            howToPlay = headline.render("Instructions", False, (255, 255, 255))
+            mainSurface.blit(howToPlay, (160, 180))
+            #  instructions
+            blit_text(mainSurface, rules, (20, 320), instructionFont)
+            # return button
+            pygame.draw.rect(mainSurface, (242, 200, 75), returnPos, 3)
+            backHome = returnFont.render("Return", False, (255, 255, 255))
+            mainSurface.blit(backHome, (355, 563))
+
+        #  in game state
         elif gameState == "main game":
 
             #  Event Handling -------------------------------------------------------------------
@@ -239,10 +307,11 @@ def main():
             clickCounter = counter.render(f"Clicks: {clickCount}", False, (255, 255, 255))
             mainSurface.blit(clickCounter, (10, 10))
 
+        #  End game state
         elif gameState == "game over":
             mousePos = pygame.mouse.get_pos()
             #  Event handling --------------------------------------------------------------
-            if ev.type == pygame.MOUSEBUTTONUP:
+            if ev.type == pygame.MOUSEBUTTONDOWN:
                 if replayButPos[0] <= mousePos[0] <= replayButPos[0] + 300 and \
                         replayButPos[1] <= mousePos[1] <= replayButPos[1] + 100:
                     gameState = "main game"
