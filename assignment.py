@@ -26,6 +26,7 @@ clock = pygame.time.Clock()  # Force frame rate to be slower
 mainSurface = pygame.display.set_mode((surfaceSize - 100, surfaceSize))
 
 
+#  Makes text lines that go under previous one when reached width of the screen
 #  Function found on https://stackoverflow.com/questions/42014195/rendering-text-with-multiple-lines-in-pygame
 def blit_text(surface, text, pos, font, color=pygame.Color('white')):
     sentences = [word.split(' ') for word in text.splitlines()]  # 2D array where each row is a list of words.
@@ -46,8 +47,9 @@ def blit_text(surface, text, pos, font, color=pygame.Color('white')):
 
 def main():
     # -----------------------------Program Variable Initialization----------------------------#
+
     #  game state
-    gameState = "menu"
+    gameState = "game over"
 
     #  Menu screen game state variables -----------------------------------------------------
 
@@ -157,6 +159,9 @@ def main():
     replayButPos = [250, 500, 300, 100]
     playAgain = pygame.font.SysFont('lucidaconsole', 40)
 
+    #  return to lobby button position
+    returnLobPos = [250, 625, 300, 100]
+
     # -----------------------------Main Program Loop---------------------------------------------#
     while True:
         # -----------------------------Event Handling-----------------------------------------#
@@ -174,6 +179,11 @@ def main():
                 if playButPos[0] <= mousePos[0] <= playButPos[0] + 250 and \
                         playButPos[1] <= mousePos[1] <= playButPos[1] + 100:
                     gameState = "main game"
+                    visible = [True for _ in range(numberOfCards)]
+                    sideUp = [False for _ in range(numberOfCards)]
+                    noPair = 0
+                    clickCount = 0
+                    random.shuffle(sprites)
                     #  Make sure to make a function that resets variables incase they go from end screen to menu
                 #  how to play button click recognition
                 elif howToButPos[0] <= mousePos[0] <= howToButPos[0] + 250 and \
@@ -320,6 +330,9 @@ def main():
                     noPair = 0
                     clickCount = 0
                     random.shuffle(sprites)
+                elif returnLobPos[0] <= mousePos[0] <= returnLobPos[0] + 300 and \
+                        returnLobPos[1] <= mousePos[1] <= returnLobPos[1] + 100:
+                    gameState = "menu"
 
             #  Program Logic ----------------------------------------------------------------
             #  Drawing everything -----------------------------------------------------------
@@ -337,6 +350,11 @@ def main():
             pygame.draw.rect(mainSurface, (255, 255, 255), replayButPos, 5)
             replayText = playAgain.render('Play Again', False, (0, 255, 0))
             mainSurface.blit(replayText, (replayButPos[0] + 30, replayButPos[1] + 30))
+
+            #  return to lobby button
+            pygame.draw.rect(mainSurface, (0, 255, 0), returnLobPos, 5)
+            lobbyText = playAgain.render('Lobby', False, (255, 255, 255))
+            mainSurface.blit(lobbyText, (returnLobPos[0] + 90, returnLobPos[1] + 30))
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
