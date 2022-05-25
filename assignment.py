@@ -297,12 +297,9 @@ def main():
                     if gameMode == "pvp":
                         if p1Turn:
                             player1Score += 1
-                            p1Turn = False
-                            p2Turn = True
+
                         elif p2Turn:
                             player2Score += 1
-                            p2Turn = False
-                            p1Turn = True
 
             #  When both cards are flipped up, this makes sure that they go back down automatically after one second
             if upTime > 0 and currentTime - upTime > 1000:
@@ -351,6 +348,12 @@ def main():
                 mainSurface.blit(p1Count, (10, 10))
                 p2Count = matchCountFont.render(f"{player2Name}: {player2Score}", False, (0, 0, 255))
                 mainSurface.blit(p2Count, (10, 50))
+                if p1Turn:
+                    p1TurnIndicator = matchCountFont.render(f"{player1Name}'s Turn", False, (255, 0, 0))
+                    mainSurface.blit(p1TurnIndicator, (550, 10))
+                elif p2Turn:
+                    p2TurnIndicator = matchCountFont.render(f"{player2Name}'s Turn", False, (0, 0, 255))
+                    mainSurface.blit(p2TurnIndicator, (550, 50))
 
         #  End game state
         elif gameState == "game over":
