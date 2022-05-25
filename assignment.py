@@ -49,7 +49,7 @@ def main():
     # -----------------------------Program Variable Initialization----------------------------#
 
     #  game state
-    gameState = "game over"
+    gameState = "menu"
 
     #  Menu screen game state variables -----------------------------------------------------
 
@@ -85,6 +85,8 @@ def main():
     returnFont = pygame.font.SysFont('impact', 40)
 
     #  main game state variables ------------------------------------------------------------
+
+    gameMode = "pvp"
 
     cardsBackground = pygame.image.load('cardGameBg.jpg')  # game background
     cardsBackground = pygame.transform.scale(cardsBackground, (surfaceSize, surfaceSize))
@@ -143,6 +145,15 @@ def main():
     #  Click counter font
     counter = pygame.font.SysFont('impact', 45)
     clickCount = 0  # amount of card clicks counter set to 0
+
+    #  Player vs Player score counter
+    player1Score = 0
+    player2Score = 0
+    matchCountFont = pygame.font.SysFont('impact', 40)
+    player1Name = "Timmy"
+    player2Name = "Sheniqua"
+    p1Turn = True
+    p2Turn = False
 
     #  Game Over State variables --------------------------------------------------------------
 
@@ -283,6 +294,15 @@ def main():
                     sideUp[selectedCard] = False
                     sideUp[selectedCard2] = False
                     noPair += 1  # Increases by one every time a pair disappears
+                    if gameMode == "pvp":
+                        if p1Turn:
+                            player1Score += 1
+                            p1Turn = False
+                            p2Turn = True
+                        elif p2Turn:
+                            player2Score += 1
+                            p2Turn = False
+                            p1Turn = True
 
             #  When both cards are flipped up, this makes sure that they go back down automatically after one second
             if upTime > 0 and currentTime - upTime > 1000:
@@ -294,6 +314,13 @@ def main():
                 secondCardUp = False
                 card1 = -1
                 card2 = -2
+                if gameMode == "pvp":
+                    if p1Turn:
+                        p1Turn = False
+                        p2Turn = True
+                    elif p2Turn:
+                        p2Turn = False
+                        p1Turn = True
 
                 #  Checks if all card matches are gone and if so changes to game over state
                 if noPair >= 10:
@@ -314,8 +341,16 @@ def main():
                         mainSurface.blit(sprites[i][0], (cardsPos[i][0] + 20, cardsPos[i][1] + 30))
 
             #  Click counter
-            clickCounter = counter.render(f"Clicks: {clickCount}", False, (255, 255, 255))
-            mainSurface.blit(clickCounter, (10, 10))
+            if gameMode == "solo":
+                clickCounter = counter.render(f"Clicks: {clickCount}", False, (255, 255, 255))
+                mainSurface.blit(clickCounter, (10, 10))
+
+            #  Player vs Player score counter
+            elif gameMode == "pvp":
+                p1Count = matchCountFont.render(f"{player1Name}: {player1Score}", False, (255, 0, 0))
+                mainSurface.blit(p1Count, (10, 10))
+                p2Count = matchCountFont.render(f"{player2Name}: {player2Score}", False, (0, 0, 255))
+                mainSurface.blit(p2Count, (10, 50))
 
         #  End game state
         elif gameState == "game over":
