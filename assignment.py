@@ -70,6 +70,15 @@ def main():
     #  How to play text
     howToPlayTxt = pygame.font.SysFont('lucidaconsole', 35)
 
+    #  Game mode selection buttons positions
+    soloButPos = [560, 400, 100, 35]
+    gameModeFont = pygame.font.SysFont('lucidaconsole', 25)
+    soloColour = (255, 255, 255)
+    pvpButPos = [560, 450, 100, 35]
+    pvpColour = (255, 255, 255)
+    soloFill = False
+    pvpFill = False
+
     #  How to play screen variables --------------------------------------------------------
     #  Background
     htpBackground = pygame.image.load('htpScreenBG.jpg')
@@ -195,11 +204,24 @@ def main():
                     noPair = 0
                     clickCount = 0
                     random.shuffle(sprites)
+                    player1Score = 0
+                    player2Score = 0
                     #  Make sure to make a function that resets variables incase they go from end screen to menu
                 #  how to play button click recognition
                 elif howToButPos[0] <= mousePos[0] <= howToButPos[0] + 250 and \
                         howToButPos[1] <= mousePos[1] <= howToButPos[1] + 50:
                     gameState = "how to play"
+                #  Game mode selection click recognition
+                elif soloButPos[0] <= mousePos[0] <= soloButPos[0] + 100 and \
+                        soloButPos[1] <= mousePos[1] <= soloButPos[1] + 35:
+                    gameMode = "solo"
+                    soloFill = True
+                    pvpFill = False
+                elif pvpButPos[0] <= mousePos[0] <= pvpButPos[0] + 100 and \
+                        pvpButPos[1] <= mousePos[1] <= pvpButPos[1] + 35:
+                    gameMode = "pvp"
+                    pvpFill = True
+                    soloFill = False
             #  logic ---------------------------------------------------------------------
             #  Drawing Everything --------------------------------------------------------------
 
@@ -220,6 +242,24 @@ def main():
             pygame.draw.rect(mainSurface, (255, 255, 255), howToButPos, 3)
             helpTxt = howToPlayTxt.render("How to Play", False, (242, 200, 75))
             mainSurface.blit(helpTxt, (howToButPos[0] + 10, howToButPos[1] + 5))
+
+            #  Game mode selection buttons
+            #  Fills back colour of selected game mode
+            if soloFill:
+                pygame.draw.rect(mainSurface, (0, 255, 255), soloButPos)
+                soloColour = (0, 0, 0)
+                pvpColour = (255, 255, 255)
+            elif pvpFill:
+                pygame.draw.rect(mainSurface, (0, 255, 255), pvpButPos)
+                pvpColour = (0, 0, 0)
+                soloColour = (255, 255, 255)
+
+            pygame.draw.rect(mainSurface, (255, 255, 255), soloButPos, 3)
+            soloText = gameModeFont.render("Solo", False, soloColour)
+            mainSurface.blit(soloText, (soloButPos[0] + 20, soloButPos[1] + 5))
+            pygame.draw.rect(mainSurface, (255, 255, 255), pvpButPos, 3)
+            pvpText = gameModeFont.render("PVP", False, pvpColour)
+            mainSurface.blit(pvpText, (pvpButPos[0] + 30, pvpButPos[1] + 5))
 
         #  How to play game state
         elif gameState == "how to play":
@@ -297,10 +337,12 @@ def main():
                     if gameMode == "pvp":
                         if p1Turn:
                             player1Score += 1
-
+                            p1Turn = False
+                            p2Turn = True
                         elif p2Turn:
                             player2Score += 1
-
+                            p2Turn = False
+                            p1Turn = True
             #  When both cards are flipped up, this makes sure that they go back down automatically after one second
             if upTime > 0 and currentTime - upTime > 1000:
                 sideUp[selectedCard] = False
@@ -368,6 +410,8 @@ def main():
                     noPair = 0
                     clickCount = 0
                     random.shuffle(sprites)
+                    player1Score = 0
+                    player2Score = 0
                 elif returnLobPos[0] <= mousePos[0] <= returnLobPos[0] + 300 and \
                         returnLobPos[1] <= mousePos[1] <= returnLobPos[1] + 100:
                     gameState = "menu"
