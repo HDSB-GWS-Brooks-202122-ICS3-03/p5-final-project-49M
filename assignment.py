@@ -82,15 +82,28 @@ def main():
     pvpFill = False
 
     #  User game names (pvp) Manually typed
+    p1NamePick = True
+    p2NamePick = False
     names = False
     p1NameBox = [275, 600, 250, 30]
     p2NameBox = [275, 650, 250, 30]
     player1Name = ""
     player2Name = ""
     name1 = gameModeFont.render(player1Name, True, (255, 0, 0))
-    textBox = name1.get_rect()
-    textBox.topleft = (330, 604)
-    cursor = pygame.Rect(textBox.topright, (3, textBox.height))
+    textBox1 = name1.get_rect()
+    textBox1.topleft = (330, 604)
+    cursor1 = pygame.Rect(textBox1.topright, (3, textBox1.height))
+    p1NameTooLong = False
+    p2NameTooLong = False
+    name2 = gameModeFont.render(player2Name, True, (0, 0, 255))
+    textBox2 = name2.get_rect()
+    textBox2.topleft = (330, 654)
+    cursor2 = pygame.Rect(textBox2.topright, (3, textBox2.height))
+
+
+    #  Check mark
+    check = pygame.image.load('check.png')
+    check = pygame.transform.scale(check, (80, 80))
 
     #  How to play screen variables --------------------------------------------------------
     #  Background
@@ -235,28 +248,63 @@ def main():
                     soloFill = False
 
             if names:
+                if ev.type == pygame.MOUSEBUTTONDOWN:
+                    if p1NameBox[0] <= mousePos[0] <= p1NameBox[0] + 250 and \
+                            p1NameBox[1] <= mousePos[1] <= p1NameBox[1] + 30:
+                        p1NamePick = True
+                        p2NamePick = False
+                    elif p2NameBox[0] <= mousePos[0] <= p2NameBox[0] + 250 and \
+                            p2NameBox[1] <= mousePos[1] <= p2NameBox[1] + 30:
+                        p2NamePick = True
+                        p1NamePick = False
                 #  Makes the text update in real time and display on the screen, reference used:
                 #  https://pygame.readthedocs.io/en/latest/4_text/text.html#edit-text-with-the-keybord
                 if ev.type == KEYDOWN:
                     if ev.key == K_BACKSPACE:
-                        if len(player1Name) > 0:
-                            name1 = gameModeFont.render(player1Name, True, (255, 0, 0))
-                            textBox.size = name1.get_size()
-                            player1Name = player1Name[:-1]
-                            cursor.topleft = textBox.topright
+                        if p1NamePick:
+                            if len(player1Name) > 0:
+                                name1 = gameModeFont.render(player1Name, True, (255, 0, 0))
+                                textBox1.size = name1.get_size()
+                                player1Name = player1Name[:-1]
+                                cursor1.topleft = textBox1.topright
+                                if textBox1[2] + 70 < p1NameBox[2]:
+                                    p1NameTooLong = False
+                        elif p2NamePick:
+                            if len(player2Name) > 0:
+                                name2 = gameModeFont.render(player2Name, True, (255, 0, 0))
+                                textBox2.size = name2.get_size()
+                                player2Name = player2Name[:-1]
+                                cursor2.topleft = textBox2.topright
+                                if textBox2[2] + 70 < p2NameBox[2]:
+                                    p2NameTooLong = False
                     else:
-                        player1Name += ev.unicode
-                        name1 = gameModeFont.render(player1Name, True, (255, 0, 0))
-                        textBox.size = name1.get_size()
-                        cursor.topleft = textBox.topright
-                        cursor[0] += 15  # Makes the cursor on the end of the letters
-                    mainSurface.blit(name1, textBox)
-
+                        if p1NamePick:
+                            if not p1NameTooLong:
+                                player1Name += ev.unicode
+                                name1 = gameModeFont.render(player1Name, True, (255, 0, 0))
+                                textBox1.size = name1.get_size()
+                                cursor1.topleft = textBox1.topright
+                                cursor1[0] += 15  # Makes the cursor on the end of the letters
+                                if textBox1[2] + 70 >= p1NameBox[2]:
+                                    p1NameTooLong = True
+                        elif p2NamePick:
+                            if not p2NameTooLong:
+                                player2Name += ev.unicode
+                                name2 = gameModeFont.render(player2Name, True, (0, 0, 255))
+                                textBox2.size = name2.get_size()
+                                cursor2. topleft = textBox2.topright
+                                cursor2[0] += 15
+                                if textBox2[2] + 70 >= p2NameBox[2]:
+                                    p2NameTooLong = True
+                            mainSurface.blit(name1, textBox1)
+                            mainSurface.blit(name2, textBox2)
             #  logic ---------------------------------------------------------------------
             if gameMode == "pvp":
                 names = True
+                pvpFill = True
             elif gameMode == "solo":
                 names = False
+                soloFill = True
 
             #  Drawing Everything --------------------------------------------------------------
 
@@ -305,10 +353,20 @@ def main():
                 mainSurface.blit(p1NameSlot, (p1NameBox[0] + 10, p1NameBox[1] + 4))
                 p2NameSlot = gameModeFont.render(f"P2: {player2Name}", False, (0, 0, 255))
                 mainSurface.blit(p2NameSlot, (p2NameBox[0] + 10, p2NameBox[1] + 4))
+                #  Check marks
+                if len(player1Name) > 0:
+                    mainSurface.blit(check, (530, 590))
 
-                if time.time() % 1 > 0.5:
-                    pygame.draw.rect(mainSurface, (255, 0, 0), cursor)
-                #  pygame.display.update()
+                if len(player2Name) > 0:
+                    mainSurface.blit(check, (530, 640))
+
+                #  Makes the cursor pop up and disappear every second
+                if p1NamePick:
+                    if time.time() % 1 > 0.5:
+                        pygame.draw.rect(mainSurface, (255, 0, 0), cursor1)
+                elif p2NamePick:
+                    if time.time() % 1 > 0.5:
+                        pygame.draw.rect(mainSurface, (0, 0, 255), cursor2)
 
         #  How to play game state
         elif gameState == "how to play":
