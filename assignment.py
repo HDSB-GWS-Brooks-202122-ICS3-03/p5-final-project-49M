@@ -234,19 +234,23 @@ def main():
                     pvpFill = True
                     soloFill = False
 
-            #  Makes the text update in real time and display on the screen, reference used:
-            #  https://pygame.readthedocs.io/en/latest/4_text/text.html#edit-text-with-the-keybord
-            if ev.type == KEYDOWN:
-                if ev.key == K_BACKSPACE:
-                    if len(player1Name) > 0:
-                        player1Name = player1Name[:-1]
-                else:
-                    player1Name += ev.unicode
-                    name1 = gameModeFont.render(player1Name, True, (255, 0, 0))
-                    textBox.size = name1.get_size()
-                    cursor.topleft = textBox.topright
-                    cursor[0] += 15  # Makes the cursor on the end of the letters
-                mainSurface.blit(name1, textBox)
+            if names:
+                #  Makes the text update in real time and display on the screen, reference used:
+                #  https://pygame.readthedocs.io/en/latest/4_text/text.html#edit-text-with-the-keybord
+                if ev.type == KEYDOWN:
+                    if ev.key == K_BACKSPACE:
+                        if len(player1Name) > 0:
+                            name1 = gameModeFont.render(player1Name, True, (255, 0, 0))
+                            textBox.size = name1.get_size()
+                            player1Name = player1Name[:-1]
+                            cursor.topleft = textBox.topright
+                    else:
+                        player1Name += ev.unicode
+                        name1 = gameModeFont.render(player1Name, True, (255, 0, 0))
+                        textBox.size = name1.get_size()
+                        cursor.topleft = textBox.topright
+                        cursor[0] += 15  # Makes the cursor on the end of the letters
+                    mainSurface.blit(name1, textBox)
 
             #  logic ---------------------------------------------------------------------
             if gameMode == "pvp":
