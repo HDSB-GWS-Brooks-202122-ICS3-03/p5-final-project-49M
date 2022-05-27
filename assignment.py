@@ -15,6 +15,8 @@
 # -----------------------------------------------------------------------------
 import pygame
 import random
+import time
+from pygame.locals import *
 
 # -----------------------------Setup------------------------------------------------------#
 pygame.init()  # Prepare the pygame module for use
@@ -79,6 +81,17 @@ def main():
     soloFill = False
     pvpFill = False
 
+    #  User game names (pvp) Manually typed
+    names = False
+    p1NameBox = [275, 600, 250, 30]
+    p2NameBox = [275, 650, 250, 30]
+    player1Name = ""
+    player2Name = ""
+    name1 = gameModeFont.render(player1Name, True, (255, 0, 0))
+    textBox = name1.get_rect()
+    textBox.topleft = (330, 604)
+    cursor = pygame.Rect(textBox.topright, (3, textBox.height))
+
     #  How to play screen variables --------------------------------------------------------
     #  Background
     htpBackground = pygame.image.load('htpScreenBG.jpg')
@@ -95,7 +108,7 @@ def main():
 
     #  main game state variables ------------------------------------------------------------
 
-    gameMode = "pvp"
+    gameMode = "solo"
 
     cardsBackground = pygame.image.load('cardGameBg.jpg')  # game background
     cardsBackground = pygame.transform.scale(cardsBackground, (surfaceSize, surfaceSize))
@@ -159,8 +172,6 @@ def main():
     player1Score = 0
     player2Score = 0
     matchCountFont = pygame.font.SysFont('impact', 40)
-    player1Name = "Timmy"
-    player2Name = "Sheniqua"
     p1Turn = True
     p2Turn = False
 
@@ -222,7 +233,27 @@ def main():
                     gameMode = "pvp"
                     pvpFill = True
                     soloFill = False
+
+            #  Makes the text update in real time and display on the screen, reference used:
+            #  https://pygame.readthedocs.io/en/latest/4_text/text.html#edit-text-with-the-keybord
+            if ev.type == KEYDOWN:
+                if ev.key == K_BACKSPACE:
+                    if len(player1Name) > 0:
+                        player1Name = player1Name[:-1]
+                else:
+                    player1Name += ev.unicode
+                    name1 = gameModeFont.render(player1Name, True, (255, 0, 0))
+                    textBox.size = name1.get_size()
+                    cursor.topleft = textBox.topright
+                    cursor[0] += 15  # Makes the cursor on the end of the letters
+                mainSurface.blit(name1, textBox)
+
             #  logic ---------------------------------------------------------------------
+            if gameMode == "pvp":
+                names = True
+            elif gameMode == "solo":
+                names = False
+
             #  Drawing Everything --------------------------------------------------------------
 
             #  Background image
@@ -254,12 +285,26 @@ def main():
                 pvpColour = (0, 0, 0)
                 soloColour = (255, 255, 255)
 
+            #  Game mode buttons
             pygame.draw.rect(mainSurface, (255, 255, 255), soloButPos, 3)
             soloText = gameModeFont.render("Solo", False, soloColour)
             mainSurface.blit(soloText, (soloButPos[0] + 20, soloButPos[1] + 5))
             pygame.draw.rect(mainSurface, (255, 255, 255), pvpButPos, 3)
             pvpText = gameModeFont.render("PVP", False, pvpColour)
             mainSurface.blit(pvpText, (pvpButPos[0] + 30, pvpButPos[1] + 5))
+
+            #  Name boxes for pvp
+            if names:
+                pygame.draw.rect(mainSurface, (255, 0, 0), p1NameBox, 2)
+                pygame.draw.rect(mainSurface, (0, 0, 255), p2NameBox, 2)
+                p1NameSlot = gameModeFont.render(f"P1: {player1Name}", False, (255, 0, 0))
+                mainSurface.blit(p1NameSlot, (p1NameBox[0] + 10, p1NameBox[1] + 4))
+                p2NameSlot = gameModeFont.render(f"P2: {player2Name}", False, (0, 0, 255))
+                mainSurface.blit(p2NameSlot, (p2NameBox[0] + 10, p2NameBox[1] + 4))
+
+                if time.time() % 1 > 0.5:
+                    pygame.draw.rect(mainSurface, (255, 0, 0), cursor)
+                #  pygame.display.update()
 
         #  How to play game state
         elif gameState == "how to play":
