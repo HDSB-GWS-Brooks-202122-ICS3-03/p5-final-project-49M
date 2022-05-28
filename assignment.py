@@ -99,7 +99,11 @@ def main():
     textBox2 = name2.get_rect()
     textBox2.topleft = (330, 654)
     cursor2 = pygame.Rect(textBox2.topright, (3, textBox2.height))
-
+    #  Variables that represent whether they inputted a name or not
+    name1Inputted = False
+    name2Inputted = False
+    asterix1 = False
+    asterix2 = False
 
     #  Check mark
     check = pygame.image.load('check.png')
@@ -222,14 +226,24 @@ def main():
             if ev.type == pygame.MOUSEBUTTONDOWN:
                 if playButPos[0] <= mousePos[0] <= playButPos[0] + 250 and \
                         playButPos[1] <= mousePos[1] <= playButPos[1] + 100:
-                    gameState = "main game"
-                    visible = [True for _ in range(numberOfCards)]
-                    sideUp = [False for _ in range(numberOfCards)]
-                    noPair = 0
-                    clickCount = 0
-                    random.shuffle(sprites)
-                    player1Score = 0
-                    player2Score = 0
+                    if gameMode == "pvp" and name1Inputted and name2Inputted or gameMode == "solo":
+                        gameState = "main game"
+                        visible = [True for _ in range(numberOfCards)]
+                        sideUp = [False for _ in range(numberOfCards)]
+                        noPair = 0
+                        clickCount = 0
+                        random.shuffle(sprites)
+                        player1Score = 0
+                        player2Score = 0
+                    elif not name1Inputted and not name2Inputted:
+                        #  doubleAsterix = True
+                        asterix1 = True
+                        asterix2 = True
+                    elif not name1Inputted:
+                        asterix1 = True
+                    elif not name2Inputted:
+                        asterix2 = True
+
                     #  Make sure to make a function that resets variables incase they go from end screen to menu
                 #  how to play button click recognition
                 elif howToButPos[0] <= mousePos[0] <= howToButPos[0] + 250 and \
@@ -290,9 +304,9 @@ def main():
                         elif p2NamePick:
                             if not p2NameTooLong:
                                 player2Name += ev.unicode
-                                name2 = gameModeFont.render(player2Name, True, (0, 0, 255))
+                                name2 = gameModeFont.render(player2Name, True, (0, 200, 255))
                                 textBox2.size = name2.get_size()
-                                cursor2. topleft = textBox2.topright
+                                cursor2.topleft = textBox2.topright
                                 cursor2[0] += 15
                                 if textBox2[2] + 70 >= p2NameBox[2]:
                                     p2NameTooLong = True
@@ -348,17 +362,38 @@ def main():
             #  Name boxes for pvp
             if names:
                 pygame.draw.rect(mainSurface, (255, 0, 0), p1NameBox, 2)
-                pygame.draw.rect(mainSurface, (0, 0, 255), p2NameBox, 2)
+                pygame.draw.rect(mainSurface, (0, 200, 255), p2NameBox, 2)
                 p1NameSlot = gameModeFont.render(f"P1: {player1Name}", False, (255, 0, 0))
                 mainSurface.blit(p1NameSlot, (p1NameBox[0] + 10, p1NameBox[1] + 4))
-                p2NameSlot = gameModeFont.render(f"P2: {player2Name}", False, (0, 0, 255))
+                p2NameSlot = gameModeFont.render(f"P2: {player2Name}", False, (0, 200, 255))
                 mainSurface.blit(p2NameSlot, (p2NameBox[0] + 10, p2NameBox[1] + 4))
                 #  Check marks
                 if len(player1Name) > 0:
                     mainSurface.blit(check, (530, 590))
+                    name1Inputted = True
+                    asterix1 = False
+                elif len(player1Name) == 0:
+                    name1Inputted = False
+                    asterix2 = False
 
                 if len(player2Name) > 0:
                     mainSurface.blit(check, (530, 640))
+                    name2Inputted = True
+                elif len(player2Name) == 0:
+                    name2Inputted = False
+
+                #  type username text
+                if not name1Inputted:
+                    typeUsername1 = gameModeFont.render("Type Username", True, (255, 255, 255))
+                else:
+                    typeUsername1 = gameModeFont.render("", False, (255, 255, 255))
+                mainSurface.blit(typeUsername1, (330, 604))
+
+                if not name2Inputted:
+                    typeUsername2 = gameModeFont.render("Type Username", True, (255, 255, 255))
+                else:
+                    typeUsername2 = gameModeFont.render("", False, (255, 255, 255))
+                mainSurface.blit(typeUsername2, (330, 654))
 
                 #  Makes the cursor pop up and disappear every second
                 if p1NamePick:
@@ -366,7 +401,19 @@ def main():
                         pygame.draw.rect(mainSurface, (255, 0, 0), cursor1)
                 elif p2NamePick:
                     if time.time() % 1 > 0.5:
-                        pygame.draw.rect(mainSurface, (0, 0, 255), cursor2)
+                        pygame.draw.rect(mainSurface, (0, 200, 255), cursor2)
+
+                #  Draws asterix's if pvp and names arent typed in
+                if asterix1 and asterix2:
+                    asterix = gameModeFont.render("*", False, (255, 255, 255))
+                    mainSurface.blit(asterix, (250, 604))
+                    mainSurface.blit(asterix, (250, 654))
+                elif asterix1:
+                    asterix = gameModeFont.render("*", False, (255, 255, 255))
+                    mainSurface.blit(asterix, (250, 604))
+                elif asterix2:
+                    asterix = gameModeFont.render("*", False, (255, 255, 255))
+                    mainSurface.blit(asterix, (250, 654))
 
         #  How to play game state
         elif gameState == "how to play":
@@ -495,14 +542,14 @@ def main():
             elif gameMode == "pvp":
                 p1Count = matchCountFont.render(f"{player1Name}: {player1Score}", False, (255, 0, 0))
                 mainSurface.blit(p1Count, (10, 10))
-                p2Count = matchCountFont.render(f"{player2Name}: {player2Score}", False, (0, 0, 255))
+                p2Count = matchCountFont.render(f"{player2Name}: {player2Score}", False, (0, 200, 255))
                 mainSurface.blit(p2Count, (10, 50))
                 if p1Turn:
                     p1TurnIndicator = matchCountFont.render(f"{player1Name}'s Turn", False, (255, 0, 0))
-                    mainSurface.blit(p1TurnIndicator, (550, 10))
+                    mainSurface.blit(p1TurnIndicator, (520, 10))
                 elif p2Turn:
-                    p2TurnIndicator = matchCountFont.render(f"{player2Name}'s Turn", False, (0, 0, 255))
-                    mainSurface.blit(p2TurnIndicator, (550, 50))
+                    p2TurnIndicator = matchCountFont.render(f"{player2Name}'s Turn", False, (0, 200, 255))
+                    mainSurface.blit(p2TurnIndicator, (520, 50))
 
         #  End game state
         elif gameState == "game over":
