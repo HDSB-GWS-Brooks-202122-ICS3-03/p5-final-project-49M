@@ -184,6 +184,7 @@ def main():
     #  Click counter font
     counter = pygame.font.SysFont('impact', 45)
     clickCount = 0  # amount of card clicks counter set to 0
+    highScore = 1000
 
     #  Player vs Player score counter
     player1Score = 0
@@ -481,7 +482,6 @@ def main():
             #  Checks if the card sprites that are flipped up are a match
             if card1 == card2:
                 if upTime > 0 and currentTime - upTime > 1000:
-                    print("match")
                     #  Makes the cards disappear
                     visible[selectedCard] = False
                     visible[selectedCard2] = False
@@ -518,6 +518,12 @@ def main():
                 #  Checks if all card matches are gone and if so changes to game over state
                 if noPair >= 10:
                     gameState = "game over"
+                    #  Saves highscores to a file for future use
+                    if gameMode == "solo" and clickCount < highScore:
+                        highScore = str(clickCount)
+                        highScoreFile = open('highScore', 'w')
+                        highScoreFile.write(highScore)
+                        highScoreFile.close()
 
             # -----------------------------Drawing Everything-------------------------------------#
             mainSurface.blit(cardsBackground, (0, 0))
@@ -571,6 +577,10 @@ def main():
                     gameState = "menu"
 
             #  Program Logic ----------------------------------------------------------------
+            readHighScore = open('highScore', 'r')
+            fileRead = readHighScore.readlines()
+            readHighScore.close()
+            print(fileRead)
             #  Drawing everything -----------------------------------------------------------
             mainSurface.blit(gameOverBG, (0, 0))
 
