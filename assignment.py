@@ -184,7 +184,10 @@ def main():
     #  Click counter font
     counter = pygame.font.SysFont('impact', 45)
     clickCount = 0  # amount of card clicks counter set to 0
-    highScore = 1000
+    highScore = open('highScore', 'r')
+    lowestNumber = highScore.readlines()
+    highScore.close()
+    lowestNumber = int(lowestNumber[0])
 
     #  Player vs Player score counter
     player1Score = 0
@@ -210,6 +213,11 @@ def main():
 
     #  return to lobby button position
     returnLobPos = [250, 625, 300, 100]
+
+    #  Lowest score text
+    lowestClicks = pygame.font.SysFont('lucidaconsole', 25)
+
+    winnerFont = pygame.font.SysFont('lucidaconsole', 25)
 
     # -----------------------------Main Program Loop---------------------------------------------#
     while True:
@@ -519,7 +527,7 @@ def main():
                 if noPair >= 10:
                     gameState = "game over"
                     #  Saves highscores to a file for future use
-                    if gameMode == "solo" and clickCount < highScore:
+                    if gameMode == "solo" and clickCount < int(lowestNumber):
                         highScore = str(clickCount)
                         highScoreFile = open('highScore', 'w')
                         highScoreFile.write(highScore)
@@ -576,11 +584,6 @@ def main():
                         returnLobPos[1] <= mousePos[1] <= returnLobPos[1] + 100:
                     gameState = "menu"
 
-            #  Program Logic ----------------------------------------------------------------
-            readHighScore = open('highScore', 'r')
-            fileRead = readHighScore.readlines()
-            readHighScore.close()
-            print(fileRead)
             #  Drawing everything -----------------------------------------------------------
             mainSurface.blit(gameOverBG, (0, 0))
 
@@ -601,6 +604,25 @@ def main():
             pygame.draw.rect(mainSurface, (0, 255, 0), returnLobPos, 5)
             lobbyText = playAgain.render('Lobby', False, (255, 255, 255))
             mainSurface.blit(lobbyText, (returnLobPos[0] + 90, returnLobPos[1] + 30))
+
+            #  Lowest click score display
+            if gameMode == "solo":
+                readHighScore = open('highScore', 'r')
+                fileRead = readHighScore.readlines()
+                readHighScore.close()
+                lowHighScore = lowestClicks.render(f'HighScore: {fileRead[0]}', False, (0, 255, 0))
+                mainSurface.blit(lowHighScore, (310, 320))
+
+            elif gameMode == "pvp":
+                if player1Score > player2Score:
+                    p1Wins = winnerFont.render(f'{player1Name} wins with {player1Score} matches', False, (0, 255, 0))
+                    mainSurface.blit(p1Wins, (230, 320))
+                elif player2Score > player1Score:
+                    p2Wins = winnerFont.render(f'{player2Name} wins with {player2Score} matches', False, (0, 255, 0))
+                    mainSurface.blit(p2Wins, (230, 320))
+                else:
+                    tie = winnerFont.render(f'Its a tie between {player1Name} and {player2Name}', False, (0, 255, 0))
+                    mainSurface.blit(tie, (160, 320))
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
