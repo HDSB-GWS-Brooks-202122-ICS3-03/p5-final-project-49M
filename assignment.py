@@ -141,9 +141,13 @@ def main():
     #  Makes all the cards back visible and all card fronts invisible
     visible = [True for _ in range(numberOfCards)]
     sideUp = [False for _ in range(numberOfCards)]
-
     selectedCard2 = -1
     selectedCard = -1
+
+    # card flipping animation
+    animation = []
+    animationTwo = []
+    scale = 1
 
     oneCardUp = False  # When no cards are flipped up this is false
     upTime = 0  # Time that both cards are flipped up, starting at 0
@@ -459,8 +463,11 @@ def main():
                 if ev.type == pygame.MOUSEBUTTONDOWN and not secondCardUp:
                     mouseX, mouseY = ev.pos
                     for i in range(numberOfCards):
-                        if i != selectedCard and cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
+                        if i != selectedCard and i not in animation and i not in animationTwo and \
+                                cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
                                 cardsPos[i][1] <= mouseY <= cardsPos[i][1] + 180:
+                            animation = [i]
+                            scale = 1
                             selectedCard2 = i
                             upTime = pygame.time.get_ticks()
                             secondCardUp = True
@@ -469,12 +476,15 @@ def main():
                             clickCount += 1
                             break
 
-            elif not oneCardUp:  # When no card is face up this is possible
+            else:  # When no card is face up this is possible
                 if ev.type == pygame.MOUSEBUTTONDOWN:
                     mouseX, mouseY = ev.pos
                     for i in range(numberOfCards):
-                        if cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
+                        if i not in animation and i not in animationTwo and \
+                                cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
                                 cardsPos[i][1] <= mouseY <= cardsPos[i][1] + 180:
+                            animation = [i]
+                            scale = 1
                             oneCardUp = True
                             selectedCard = i
                             sideUp[i] = True
@@ -484,54 +494,58 @@ def main():
 
             # -----------------------------Program Logic---------------------------------------------#
 
-            #  Gets the current time of the program run time
-            currentTime = pygame.time.get_ticks()
+            if len(animation) == 0 and len(animationTwo) == 0:
+                #  Gets the current time of the program run time
+                currentTime = pygame.time.get_ticks()
 
-            #  Checks if the card sprites that are flipped up are a match
-            if card1 == card2:
-                if upTime > 0 and currentTime - upTime > 1000:
-                    #  Makes the cards disappear
-                    visible[selectedCard] = False
-                    visible[selectedCard2] = False
+                #  Checks if the card sprites that are flipped up are a match
+                if card1 == card2:
+                    if upTime > 0 and currentTime - upTime > 3000:
+                        #  Makes the cards disappear
+                        visible[selectedCard] = False
+                        visible[selectedCard2] = False
+                        sideUp[selectedCard] = False
+                        sideUp[selectedCard2] = False
+                        noPair += 1  # Increases by one every time a pair disappears
+                        if gameMode == "pvp":
+                            if p1Turn:
+                                player1Score += 1
+                                p1Turn = False
+                                p2Turn = True
+                            elif p2Turn:
+                                player2Score += 1
+                                p2Turn = False
+                                p1Turn = True
+                #  When both cards are flipped up, this makes sure that they go back down automatically after one second
+                if upTime > 0 and currentTime - upTime > 3000:
                     sideUp[selectedCard] = False
                     sideUp[selectedCard2] = False
-                    noPair += 1  # Increases by one every time a pair disappears
+                    animation = [selectedCard, selectedCard2]
+                    animationTwo = []
+                    scale = 1
+                    selectedCard2 = False
+                    oneCardUp = False
+                    upTime = 0
+                    secondCardUp = False
+                    card1 = -1
+                    card2 = -2
                     if gameMode == "pvp":
                         if p1Turn:
-                            player1Score += 1
                             p1Turn = False
                             p2Turn = True
                         elif p2Turn:
-                            player2Score += 1
                             p2Turn = False
                             p1Turn = True
-            #  When both cards are flipped up, this makes sure that they go back down automatically after one second
-            if upTime > 0 and currentTime - upTime > 1000:
-                sideUp[selectedCard] = False
-                sideUp[selectedCard2] = False
-                selectedCard2 = False
-                oneCardUp = False
-                upTime = 0
-                secondCardUp = False
-                card1 = -1
-                card2 = -2
-                if gameMode == "pvp":
-                    if p1Turn:
-                        p1Turn = False
-                        p2Turn = True
-                    elif p2Turn:
-                        p2Turn = False
-                        p1Turn = True
 
-                #  Checks if all card matches are gone and if so changes to game over state
-                if noPair >= 10:
-                    gameState = "game over"
-                    #  Saves highscores to a file for future use
-                    if gameMode == "solo" and clickCount < int(lowestNumber):
-                        highScore = str(clickCount)
-                        highScoreFile = open('highScore', 'w')
-                        highScoreFile.write(highScore)
-                        highScoreFile.close()
+                    #  Checks if all card matches are gone and if so changes to game over state
+                    if noPair >= 10:
+                        gameState = "game over"
+                        #  Saves highscores to a file for future use
+                        if gameMode == "solo" and clickCount < int(lowestNumber):
+                            highScore = str(clickCount)
+                            highScoreFile = open('highScore', 'w')
+                            highScoreFile.write(highScore)
+                            highScoreFile.close()
 
             # -----------------------------Drawing Everything-------------------------------------#
             mainSurface.blit(cardsBackground, (0, 0))
@@ -540,12 +554,64 @@ def main():
             #  Back of card
             for i in range(numberOfCards):
                 if visible[i]:
-                    cardImage = cardsBack
-                    mainSurface.blit(cardImage, cardsPos[i])
                     if sideUp[i]:  # Front of card
-                        cardImage = cardsFront
-                        mainSurface.blit(cardImage, cardsPos[i])
-                        mainSurface.blit(sprites[i][0], (cardsPos[i][0] + 20, cardsPos[i][1] + 30))
+                        if i in animation:
+                            scale -= 0.03
+                            if scale > 0:
+                                widthBack = scale * cardsBack.get_width()
+                                heightBack = cardsBack.get_height()
+                                card = pygame.transform.scale(cardsBack, (widthBack, heightBack))
+                                mainSurface.blit(card, cardsPos[i])
+                            else:
+                                animation.remove(i)
+                                animationTwo.append(i)
+                        elif i in animationTwo:
+                            scale += 0.03
+                            if 0 < scale < 1:
+                                widthFront = scale * cardsFront.get_width()
+                                heightFront = cardsFront.get_height()
+                                card = pygame.transform.scale(cardsFront, (widthFront, heightFront))
+                                mainSurface.blit(card, cardsPos[i])
+
+                                sprite = sprites[i][0]
+                                widthSprite = scale * sprite.get_width()
+                                heightSprite = sprite.get_height()
+                                image = pygame.transform.scale(sprite, (widthSprite, heightSprite))
+                                mainSurface.blit(image, (cardsPos[i][0] + 20 * scale, cardsPos[i][1] + 30))
+                            else:
+                                animationTwo.remove(i)
+                        else:
+                            mainSurface.blit(cardsFront, cardsPos[i])
+                            mainSurface.blit(sprites[i][0], (cardsPos[i][0] + 20, cardsPos[i][1] + 30))
+                    else:
+                        if i in animation:
+                            scale -= 0.03
+                            if scale > 0:
+                                width = scale * cardsFront.get_width()
+                                height = cardsFront.get_height()
+                                card = pygame.transform.scale(cardsFront, (width, height))
+                                mainSurface.blit(card, cardsPos[i])
+
+                                sprite = sprites[i][0]
+                                widthSprite = scale * sprite.get_width()
+                                heightSprite = sprite.get_height()
+                                image = pygame.transform.scale(sprite, (widthSprite, heightSprite))
+                                mainSurface.blit(image, (cardsPos[i][0] + 20 * scale, cardsPos[i][1] + 30))
+                            else:
+                                animation.remove(i)
+                                animationTwo.append(i)
+
+                        elif i in animationTwo:
+                            scale += 0.03
+                            if 0 < scale < 1:
+                                widthBack = scale * cardsBack.get_width()
+                                heightBack = cardsBack.get_height()
+                                card = pygame.transform.scale(cardsBack, (widthBack, heightBack))
+                                mainSurface.blit(card, cardsPos[i])
+                            else:
+                                animationTwo.remove(i)
+                        else:
+                            mainSurface.blit(cardsBack, cardsPos[i])
 
             #  Click counter
             if gameMode == "solo":
