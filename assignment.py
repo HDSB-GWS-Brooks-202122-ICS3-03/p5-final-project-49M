@@ -145,9 +145,8 @@ def main():
     selectedCard = -1
 
     # card flipping animation
-    animation = []
-    animationTwo = []
-    scale = 1
+    animation = {}
+    animationTwo = {}
 
     oneCardUp = False  # When no cards are flipped up this is false
     upTime = 0  # Time that both cards are flipped up, starting at 0
@@ -466,8 +465,7 @@ def main():
                         if i != selectedCard and i not in animation and i not in animationTwo and \
                                 cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
                                 cardsPos[i][1] <= mouseY <= cardsPos[i][1] + 180:
-                            animation = [i]
-                            scale = 1
+                            animation = {i: 1}
                             selectedCard2 = i
                             upTime = pygame.time.get_ticks()
                             secondCardUp = True
@@ -483,8 +481,7 @@ def main():
                         if i not in animation and i not in animationTwo and \
                                 cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
                                 cardsPos[i][1] <= mouseY <= cardsPos[i][1] + 180:
-                            animation = [i]
-                            scale = 1
+                            animation = {i: 1}
                             oneCardUp = True
                             selectedCard = i
                             sideUp[i] = True
@@ -520,9 +517,8 @@ def main():
                 if upTime > 0 and currentTime - upTime > 3000:
                     sideUp[selectedCard] = False
                     sideUp[selectedCard2] = False
-                    animation = [selectedCard, selectedCard2]
-                    animationTwo = []
-                    scale = 1
+                    animation = {selectedCard: 1, selectedCard2: 1}
+                    animationTwo = {}
                     selectedCard2 = False
                     oneCardUp = False
                     upTime = 0
@@ -556,18 +552,22 @@ def main():
                 if visible[i]:
                     if sideUp[i]:  # Front of card
                         if i in animation:
+                            scale = animation[i]
                             scale -= 0.03
+                            animation[i] = scale
                             if scale > 0:
                                 widthBack = scale * cardsBack.get_width()
                                 heightBack = cardsBack.get_height()
                                 card = pygame.transform.scale(cardsBack, (widthBack, heightBack))
                                 mainSurface.blit(card, cardsPos[i])
                             else:
-                                animation.remove(i)
-                                animationTwo.append(i)
+                                animation.pop(i)
+                                animationTwo[i] = 0
                         elif i in animationTwo:
+                            scale = animationTwo[i]
                             scale += 0.03
-                            if 0 < scale < 1:
+                            animationTwo[i] = scale
+                            if scale < 1:
                                 widthFront = scale * cardsFront.get_width()
                                 heightFront = cardsFront.get_height()
                                 card = pygame.transform.scale(cardsFront, (widthFront, heightFront))
@@ -579,13 +579,15 @@ def main():
                                 image = pygame.transform.scale(sprite, (widthSprite, heightSprite))
                                 mainSurface.blit(image, (cardsPos[i][0] + 20 * scale, cardsPos[i][1] + 30))
                             else:
-                                animationTwo.remove(i)
+                                animationTwo.pop(i)
                         else:
                             mainSurface.blit(cardsFront, cardsPos[i])
                             mainSurface.blit(sprites[i][0], (cardsPos[i][0] + 20, cardsPos[i][1] + 30))
                     else:
                         if i in animation:
+                            scale = animation[i]
                             scale -= 0.03
+                            animation[i] = scale
                             if scale > 0:
                                 width = scale * cardsFront.get_width()
                                 height = cardsFront.get_height()
@@ -598,18 +600,20 @@ def main():
                                 image = pygame.transform.scale(sprite, (widthSprite, heightSprite))
                                 mainSurface.blit(image, (cardsPos[i][0] + 20 * scale, cardsPos[i][1] + 30))
                             else:
-                                animation.remove(i)
-                                animationTwo.append(i)
+                                animation.pop(i)
+                                animationTwo[i] = 0
 
                         elif i in animationTwo:
+                            scale = animationTwo[i]
                             scale += 0.03
-                            if 0 < scale < 1:
+                            animationTwo[i] = scale
+                            if scale < 1:
                                 widthBack = scale * cardsBack.get_width()
                                 heightBack = cardsBack.get_height()
                                 card = pygame.transform.scale(cardsBack, (widthBack, heightBack))
                                 mainSurface.blit(card, cardsPos[i])
                             else:
-                                animationTwo.remove(i)
+                                animationTwo.pop(i)
                         else:
                             mainSurface.blit(cardsBack, cardsPos[i])
 
