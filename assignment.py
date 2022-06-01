@@ -4,14 +4,25 @@
 #
 # Author:      Michal Buczek
 # Created:     06-May-2022
-# Updated:     13-Sept-2020
+# Updated:     01-June-2022
 # -----------------------------------------------------------------------------
-# I think this project deserves a level XXXXXX because ...
+# I think this project deserves a level 4+ because I have all the necessary features from levels 1-4 such as;
+# (user-friendly interface, loops, lists, dictionary, read and write file, proper naming conventions, game states, etc.)
+# I have also challenged myself by incorporating other concepts we may have learnt in class or even outside of class
+# with a little self learning. These cool new concepts are listed in the Features Added section below.
+# Overall I enjoyed the process of making this game, and
+# I worked really hard to make daily commits.
 #
 # Features Added:
-#   ...
-#   ...
-#   ...
+#   1. Flip animation: Probably the hardest feature to add. I ran into lots of bugs and fixed them with dictionary use
+#   and nat saving all variables
+#   2. Player name input: Making the letters pop up on the screen visually in real time was a challenge, but I managed
+#   to get it done by implementing a similar strategy from a source that I referenced.
+#   3. Making a text paragraph: Using another source I was able to make a function which makes lines under previous text
+#   when reaching the right side of the screen.
+#   4. Two game modes: Pvp and solo which have separate objectives. PVP objective to get most pairs, solo objective to
+#   beat the high score which is saved in a readable file.
+#   5. Time reading which makes cards flip back down after 2 seconds following the click.
 # -----------------------------------------------------------------------------
 import pygame
 import random
