@@ -287,7 +287,7 @@ def main():
                 #  https://pygame.readthedocs.io/en/latest/4_text/text.html#edit-text-with-the-keybord
                 if ev.type == KEYDOWN:
                     if ev.key == K_BACKSPACE:
-                        if p1NamePick:
+                        if p1NamePick:  # Player inputs their game name
                             if len(player1Name) > 0:
                                 name1 = gameModeFont.render(player1Name, True, (255, 0, 0))
                                 textBox1.size = name1.get_size()
@@ -304,7 +304,7 @@ def main():
                                 if textBox2[2] + 70 < p2NameBox[2]:
                                     p2NameTooLong = False
                     else:
-                        if p1NamePick:
+                        if p1NamePick:  # Makes sure that the name is not too long
                             if not p1NameTooLong:
                                 player1Name += ev.unicode
                                 name1 = gameModeFont.render(player1Name, True, (255, 0, 0))
@@ -415,7 +415,7 @@ def main():
                     if time.time() % 1 > 0.5:
                         pygame.draw.rect(mainSurface, (0, 200, 255), cursor2)
 
-                #  Draws asterix's if pvp and names arent typed in
+                #  Draws asterisk's if pvp and names aren't typed in
                 if asterix1 and asterix2:
                     asterix = gameModeFont.render("*", False, (255, 255, 255))
                     mainSurface.blit(asterix, (250, 604))
@@ -462,10 +462,10 @@ def main():
                 if ev.type == pygame.MOUSEBUTTONDOWN and not secondCardUp:
                     mouseX, mouseY = ev.pos
                     for i in range(numberOfCards):
-                        if i != selectedCard and i not in animation and i not in animationTwo and \
+                        if i != selectedCard and \
                                 cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
                                 cardsPos[i][1] <= mouseY <= cardsPos[i][1] + 180:
-                            animation = {i: 1}
+                            animation[i] = 1
                             selectedCard2 = i
                             upTime = pygame.time.get_ticks()
                             secondCardUp = True
@@ -478,10 +478,9 @@ def main():
                 if ev.type == pygame.MOUSEBUTTONDOWN:
                     mouseX, mouseY = ev.pos
                     for i in range(numberOfCards):
-                        if i not in animation and i not in animationTwo and \
-                                cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
+                        if cardsPos[i][0] <= mouseX <= cardsPos[i][0] + 100 and \
                                 cardsPos[i][1] <= mouseY <= cardsPos[i][1] + 180:
-                            animation = {i: 1}
+                            animation[i] = 1
                             oneCardUp = True
                             selectedCard = i
                             sideUp[i] = True
@@ -490,58 +489,58 @@ def main():
                             break
 
             # -----------------------------Program Logic---------------------------------------------#
+            #  Gets the current time of the program run time
+            currentTime = pygame.time.get_ticks()
 
-            if len(animation) == 0 and len(animationTwo) == 0:
-                #  Gets the current time of the program run time
-                currentTime = pygame.time.get_ticks()
-
-                #  Checks if the card sprites that are flipped up are a match
-                if card1 == card2:
-                    if upTime > 0 and currentTime - upTime > 3000:
-                        #  Makes the cards disappear
-                        visible[selectedCard] = False
-                        visible[selectedCard2] = False
-                        sideUp[selectedCard] = False
-                        sideUp[selectedCard2] = False
-                        noPair += 1  # Increases by one every time a pair disappears
-                        if gameMode == "pvp":
-                            if p1Turn:
-                                player1Score += 1
-                                p1Turn = False
-                                p2Turn = True
-                            elif p2Turn:
-                                player2Score += 1
-                                p2Turn = False
-                                p1Turn = True
-                #  When both cards are flipped up, this makes sure that they go back down automatically after one second
-                if upTime > 0 and currentTime - upTime > 3000:
+            #  Checks if the card sprites that are flipped up are a match
+            if card1 == card2:
+                if upTime > 0 and currentTime - upTime > 2000:
+                    #  Makes the cards disappear
+                    visible[selectedCard] = False
+                    visible[selectedCard2] = False
                     sideUp[selectedCard] = False
                     sideUp[selectedCard2] = False
-                    animation = {selectedCard: 1, selectedCard2: 1}
-                    animationTwo = {}
-                    selectedCard2 = False
-                    oneCardUp = False
-                    upTime = 0
-                    secondCardUp = False
-                    card1 = -1
-                    card2 = -2
+                    noPair += 1  # Increases by one every time a pair disappears
                     if gameMode == "pvp":
                         if p1Turn:
+                            player1Score += 1
                             p1Turn = False
                             p2Turn = True
                         elif p2Turn:
+                            player2Score += 1
                             p2Turn = False
                             p1Turn = True
 
-                    #  Checks if all card matches are gone and if so changes to game over state
-                    if noPair >= 10:
-                        gameState = "game over"
-                        #  Saves highscores to a file for future use
-                        if gameMode == "solo" and clickCount < int(lowestNumber):
-                            highScore = str(clickCount)
-                            highScoreFile = open('highScore', 'w')
-                            highScoreFile.write(highScore)
-                            highScoreFile.close()
+            #  When both cards are flipped up, this makes sure that they go back down automatically after one second
+            if upTime > 0 and currentTime - upTime > 2000:
+                sideUp[selectedCard] = False
+                sideUp[selectedCard2] = False
+                animation = {selectedCard: 1, selectedCard2: 1}
+                animationTwo = {}
+                selectedCard = -1
+                selectedCard2 = -1
+                oneCardUp = False
+                secondCardUp = False
+                card1 = -1
+                card2 = -2
+                upTime = 0
+                if gameMode == "pvp":
+                    if p1Turn:
+                        p1Turn = False
+                        p2Turn = True
+                    elif p2Turn:
+                        p2Turn = False
+                        p1Turn = True
+
+            #  Checks if all card matches are gone and if so changes to game over state
+            if noPair >= 10:
+                gameState = "game over"
+                #  Saves highscores to a file for future use
+                if gameMode == "solo" and clickCount < int(lowestNumber):
+                    highScore = str(clickCount)
+                    highScoreFile = open('highScore', 'w')
+                    highScoreFile.write(highScore)
+                    highScoreFile.close()
 
             # -----------------------------Drawing Everything-------------------------------------#
             mainSurface.blit(cardsBackground, (0, 0))
@@ -549,44 +548,43 @@ def main():
             #  Drawing cards
             #  Back of card
             for i in range(numberOfCards):
-                if visible[i]:
+                if visible[i]:  # Checks if the card is being drawn
                     if sideUp[i]:  # Front of card
                         if i in animation:
                             scale = animation[i]
-                            scale -= 0.03
+                            scale -= 0.05  # scales down the image width
                             animation[i] = scale
-                            if scale > 0:
-                                widthBack = scale * cardsBack.get_width()
+                            if scale > 0:  # checks if the card back is still visible
+                                widthBack = scale * cardsBack.get_width()  # decreases the width of the card by scale
                                 heightBack = cardsBack.get_height()
                                 card = pygame.transform.scale(cardsBack, (widthBack, heightBack))
                                 mainSurface.blit(card, cardsPos[i])
-                            else:
+                            else:  # if the card back is invisible (<=0) then it gets rid of the animation index
                                 animation.pop(i)
                                 animationTwo[i] = 0
-                        elif i in animationTwo:
+                        elif i in animationTwo:  # When the second animation is present in the dictionary
                             scale = animationTwo[i]
-                            scale += 0.03
+                            scale += 0.05
                             animationTwo[i] = scale
-                            if scale < 1:
+                            if scale < 1:  # continues if the card is smaller than its regular size
                                 widthFront = scale * cardsFront.get_width()
                                 heightFront = cardsFront.get_height()
                                 card = pygame.transform.scale(cardsFront, (widthFront, heightFront))
                                 mainSurface.blit(card, cardsPos[i])
-
-                                sprite = sprites[i][0]
+                                sprite = sprites[i][0]  # Makes the sprite go through the same motion as the card front
                                 widthSprite = scale * sprite.get_width()
                                 heightSprite = sprite.get_height()
                                 image = pygame.transform.scale(sprite, (widthSprite, heightSprite))
                                 mainSurface.blit(image, (cardsPos[i][0] + 20 * scale, cardsPos[i][1] + 30))
                             else:
-                                animationTwo.pop(i)
+                                animationTwo.pop(i)  # When the card front is regular size it pops the index and value
                         else:
                             mainSurface.blit(cardsFront, cardsPos[i])
                             mainSurface.blit(sprites[i][0], (cardsPos[i][0] + 20, cardsPos[i][1] + 30))
-                    else:
+                    else:  # The opposite operation where the flip is from front back to down
                         if i in animation:
                             scale = animation[i]
-                            scale -= 0.03
+                            scale -= 0.05
                             animation[i] = scale
                             if scale > 0:
                                 width = scale * cardsFront.get_width()
@@ -605,7 +603,7 @@ def main():
 
                         elif i in animationTwo:
                             scale = animationTwo[i]
-                            scale += 0.03
+                            scale += 0.05
                             animationTwo[i] = scale
                             if scale < 1:
                                 widthBack = scale * cardsBack.get_width()
@@ -650,6 +648,8 @@ def main():
                     random.shuffle(sprites)
                     player1Score = 0
                     player2Score = 0
+                    animation = {}
+                    animationTwo = {}
                 elif returnLobPos[0] <= mousePos[0] <= returnLobPos[0] + 300 and \
                         returnLobPos[1] <= mousePos[1] <= returnLobPos[1] + 100:
                     gameState = "menu"
